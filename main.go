@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
-var cliName string = "pokedex"
+var cliName string = "Pokedex"
 
 type cliCommand struct {
 	name        string
@@ -30,21 +31,32 @@ var commands map[string]cliCommand = map[string]cliCommand{
 
 func main() {
 	reader := bufio.NewScanner(os.Stdin)
-	printPrompt()
-	for reader.Scan() {
-		text := reader.Text()
-		if command, ok := commands[text]; ok {
-			command.callback()
-		} else {
-
-		}
+	for {
 		printPrompt()
+		reader.Scan()
+		text := reader.Text()
+		commandName := cleanInput(text)[0]
+		if command, ok := commands[commandName]; ok {
+			err := command.callback()
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
+		} else {
+			fmt.Println("Unknown command")
+			continue
+		}
 	}
-	fmt.Println()
 }
 
 func printPrompt() {
-	fmt.Print(cliName, "> ")
+	fmt.Print(cliName, " > ")
+}
+
+func cleanInput(text string) []string {
+	input := strings.ToLower(text)
+	inputWords := strings.Fields(input)
+	return inputWords
 }
 
 func commandHelp() error {
