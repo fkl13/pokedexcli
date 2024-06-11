@@ -1,3 +1,3 @@
-module github.com/fkl13/boot.dev/pokedex
+module github.com/fkl13/pokedexcli
 
 go 1.22.0
