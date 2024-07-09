@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var cliName string = "Pokedex"
@@ -59,8 +60,13 @@ func (p *pagination) String() string {
 	return fmt.Sprintf("Next: %s, Previous: %s", next, prev)
 }
 
+var cache Cache
+
 func main() {
 	reader := bufio.NewScanner(os.Stdin)
+
+	interval := time.Minute
+	cache = NewCache(interval)
 
 	apiURL := "https://pokeapi.co/api/v2/location-area/"
 	pagination := pagination{
@@ -133,8 +139,8 @@ func commandMap(p *pagination) error {
 		return err
 	}
 
-	p.previous = &locations.Previous
-	p.next = &locations.Next
+	p.previous = locations.Previous
+	p.next = locations.Next
 
 	for _, l := range locations.Results {
 		fmt.Println(l.Name)
@@ -153,8 +159,8 @@ func commandMapb(p *pagination) error {
 		return err
 	}
 
-	p.previous = &locations.Previous
-	p.next = &locations.Next
+	p.previous = locations.Previous
+	p.next = locations.Next
 
 	for _, l := range locations.Results {
 		fmt.Println(l.Name)
