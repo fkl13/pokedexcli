@@ -80,3 +80,36 @@ type Location struct {
 		} `json:"pokemon"`
 	} `json:"pokemon_encounters"`
 }
+
+func getPokemon(name string) (Pokemon, error) {
+	url := baseURL + "/pokemon/" + name
+	res, err := http.Get(url)
+	if err != nil {
+		return Pokemon{}, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return Pokemon{}, err
+	}
+
+	pokemon := Pokemon{}
+	err = json.Unmarshal(body, &pokemon)
+	if err != nil {
+		return Pokemon{}, err
+	}
+
+	return pokemon, nil
+}
+
+type Pokemon struct {
+	ID                     int    `json:"id"`
+	Name                   string `json:"name"`
+	BaseExperience         int    `json:"base_experience"`
+	Height                 int    `json:"height"`
+	IsDefault              bool   `json:"is_default"`
+	Order                  int    `json:"order"`
+	Weight                 int    `json:"weight"`
+	LocationAreaEncounters string `json:"location_area_encounters"`
+}
