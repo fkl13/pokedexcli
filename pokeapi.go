@@ -83,22 +83,28 @@ type Location struct {
 
 func getPokemon(name string) (Pokemon, error) {
 	url := baseURL + "/pokemon/" + name
-	res, err := http.Get(url)
-	if err != nil {
-		return Pokemon{}, err
-	}
-	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return Pokemon{}, err
+	body, ok := cache.Get(url)
+	if !ok {
+		res, err := http.Get(url)
+		if err != nil {
+			return Pokemon{}, err
+		}
+		defer res.Body.Close()
+
+		body, err = io.ReadAll(res.Body)
+		if err != nil {
+			return Pokemon{}, err
+		}
 	}
 
 	pokemon := Pokemon{}
-	err = json.Unmarshal(body, &pokemon)
+	err := json.Unmarshal(body, &pokemon)
 	if err != nil {
 		return Pokemon{}, err
 	}
+
+	cache.Add(url, body)
 
 	return pokemon, nil
 }
@@ -112,4 +118,19 @@ type Pokemon struct {
 	Order                  int    `json:"order"`
 	Weight                 int    `json:"weight"`
 	LocationAreaEncounters string `json:"location_area_encounters"`
+	Stats                  []struct {
+		BaseStat int `json:"base_stat"`
+		Effort   int `json:"effort"`
+		Stat     struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"stat"`
+	} `json:"stats"`
+	Types []struct {
+		Slot int `json:"slot"`
+		Type struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"type"`
+	} `json:"types"`
 }
